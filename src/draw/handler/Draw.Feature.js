@@ -12,6 +12,7 @@ L.Draw.Feature = L.Handler.extend({
 		this._container = map._container;
 		this._overlayPane = map._panes.overlayPane;
 		this._popupPane = map._panes.popupPane;
+		this._data = null;
 
 		// Merge default shapeOptions options with custom shapeOptions
 		if (options && options.shapeOptions) {
@@ -35,11 +36,15 @@ L.Draw.Feature = L.Handler.extend({
 			return;
 		}
 
+		if (arguments.length === 1) {
+			this._data = arguments[0];
+		}
+
 		L.Handler.prototype.enable.call(this);
 
 		this.fire('enabled', {handler: this.type});
 
-		this._map.fire(L.Draw.Event.DRAWSTART, {layerType: this.type});
+		this._map.fire(L.Draw.Event.DRAWSTART,  {layerType: this.type, data: this._data });
 	},
 
 	// @method disable(): void
@@ -50,7 +55,7 @@ L.Draw.Feature = L.Handler.extend({
 
 		L.Handler.prototype.disable.call(this);
 
-		this._map.fire(L.Draw.Event.DRAWSTOP, {layerType: this.type});
+		this._map.fire(L.Draw.Event.DRAWSTOP, { layerType: this.type, data: this._data });
 
 		this.fire('disabled', {handler: this.type});
 	},
@@ -91,13 +96,13 @@ L.Draw.Feature = L.Handler.extend({
 	},
 
 	_fireCreatedEvent: function (layer) {
-		this._map.fire(L.Draw.Event.CREATED, {layer: layer, layerType: this.type});
+		this._map.fire(L.Draw.Event.CREATED, {layer: layer, layerType: this.type, data: this._data});
 	},
 
 	// Cancel drawing when the escape key is pressed
 	_cancelDrawing: function (e) {
 		if (e.keyCode === 27) {
-			this._map.fire('draw:canceled', {layerType: this.type});
+			this._map.fire('draw:canceled', { layerType: this.type, data: this._data });
 			this.disable();
 		}
 	}
